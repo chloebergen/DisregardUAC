@@ -13,7 +13,7 @@ $testPath = "$appPath.manifest"
 ## If PatientNow is currently running as any user, the process will terminate.
 $processPN = Get-Process -name "*PatientNow*"
 if ($null -ne $processPN) {
-    Stop-Process -InputObject $processPN 
+    Stop-Process -InputObject $processPN -Force
     Get-Process | Where-Object {$_.HasExited}
 } else {
     Write-Host "PatientNow is not running currently, proceeding..."}
@@ -50,7 +50,7 @@ $manifestPath = "$appPath.manifest"
 
 ## Applies the manifest file to the application path.
 Write-Host "Applying the compatibility manifest to PatientNow..."
-cmd.exe /c "mt.exe -manifest $manifestPath -outputresource:`"$appPath`;#1"
+cmd.exe /c "mt.exe -manifest $manifestPath -outputresource:`"$appPath`;#1" 
 Write-Host "UAC prompts have been disabled for PatientNow."
 
 
