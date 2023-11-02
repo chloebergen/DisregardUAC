@@ -9,15 +9,17 @@ $appPath = "C:\PN\CloudLoader\PatientNowCloudLoader.exe"
 $errorPath = "C:\PN\CloudLoader\AutomationError.txt"
 $testPath = "$appPath.manifest"
 
-## If PatientNow is currently running as any user, the process will terminate.
-$processPN = Get-Process -name "*PatientNow*"
-if ($null -ne $processPN) {
-    Stop-Process -InputObject $processPN -Force
-    Get-Process | Where-Object {$_.HasExited}
-} else {
-    Write-Host "PatientNow is not running currently, proceeding..."}
+# Get all processes with executable paths in the specified directory, kill them, and wait for exit before proceeding.
+$processDirectory = "C:\PN\*"
+$processList = Get-Process | Where-Object { $_.MainModule.FileName -like "$processDirectory*" }
 
-    
+foreach ($process in $processList){
+    Stop-Process -InputObject $process -Force -Verbose
+    $process.WaitForExit()
+}
+
+Write-Host "All processes in $processDirectory have been successfully terminated."
+
 ## Abort if the manifest file already exists.
 function ManifestExists {
     if (Test-Path $testPath -PathType Leaf) {
@@ -26,12 +28,12 @@ function ManifestExists {
     } else {
         Write-Host "Manifest has not been applied previously, continuing with application.."
     }
-    }
-    ManifestExists 2>&1 > $errorPath
+}
+ManifestExists 2>&1 > $errorPath
 
 
 ## Adds an application compatibility entry to prevent UAC prompts for the specified path.
-Write-Host "Disabling UAC for PatientNow..."
+Write-Host "Creating the manifest file.."
 $manifestPath = "$appPath.manifest"
 @"
 <?xml version='1.0' encoding='UTF-8' standalone='yes'?>
@@ -48,9 +50,9 @@ $manifestPath = "$appPath.manifest"
 
 
 ## Applies the manifest file to the application path.
-Write-Host "Applying the compatibility manifest to PatientNow..."
+Write-Host "Applying the compatibility manifest to the application.."
 cmd.exe /c "mt.exe -manifest $manifestPath -outputresource:`"$appPath`;#1" 
-Write-Host "UAC prompts have been disabled for PatientNow."
+Write-Host "UAC prompts have been disabled for the application."
 
 
 ## 
