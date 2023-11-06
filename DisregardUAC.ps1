@@ -1,3 +1,6 @@
+## This script creates and applies an application manifest to PatientNow's cloud loader, preventing it from requiring admin credentials.
+## Author: Chloe Bergen (https://github.com/chloebergen)
+
 ## Disables confirm dialogue, starts transcribing 
 $ConfirmPreference = "None"
 $transcriptPath = "C:\PN\CloudLoader\AutomationTranscript.txt"
