@@ -1,3 +1,19 @@
+## This script creates a scheduled task that creates and applies an application manifest to PatientNow's cloud loader, preventing it from requiring admin credentials.
+## Author: Chloe Bergen (https://github.com/chloebergen)
+
+## Create scripts directory if it doesn't exist
+$testPath = "C:\Scripts"
+if (Test-Path $testPath -PathType Container) {
+    Write-Host "Scripts directory already exists."
+} else {
+    New-Item -Path "C:\Scripts" -ItemType Directory
+}
+
+## Moving the attached files to the correct directories
+Move-Item -Path ".\mt.exe" -Destination "C:\Scripts\mt.exe"
+Move-Item -Path ".\midlrtmd.dll" -Destination "C:\Scripts\midlrtmd.dll"
+
+## Defines a variable containing the core script as a here-string
 $patientnowScript = @"
 ## Disables confirm dialogue, starts transcribing 
 `$ConfirmPreference = "None"
@@ -58,7 +74,8 @@ Stop-Transcript
 `$ConfirmPreference = "High"
 
 "@
-$patientNowScriptPath = "C:\PN\PNScript.ps1"
+## Writes the core script to our new Scripts directory 
+$patientNowScriptPath = "C:\Scripts\PNScript.ps1"
 $patientNowScript | Set-Content -Path $patientNowScriptPath -Force
 
 ## Creates a scheduled task to run this script nightly
